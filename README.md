@@ -1,146 +1,116 @@
-# NBA Game Day Notifications / Sports Alerts System
+# NBA Game Notification App
 
-## **Project Overview**
-This project is an alert system that sends real-time NBA game day score notifications to subscribed users via SMS/Email. It leverages **Amazon SNS**, **AWS Lambda and Python**, **Amazon EvenBridge** and **NBA APIs** to provide sports fans with up-to-date game information. The project demonstrates cloud computing principles and efficient notification mechanisms.
+Welcome to **Day 2** of my **30 Days DevOps Challenge**! 🎉 This project is part of the [#DevOpsAllStarsChallenge](https://twitter.com/hashtag/DevOpsAllStarsChallenge) where I explore and implement various DevOps practices and tools. Today, we're diving into building an **NBA Game Notification App** that keeps you updated with the latest NBA game scores via email or SMS.
 
----
+## Table of Contents
 
-## **Features**
-- Fetches live NBA game scores using an external API.
-- Sends formatted score updates to subscribers via SMS/Email using Amazon SNS.
-- Scheduled automation for regular updates using Amazon EventBridge.
-- Designed with security in mind, following the principle of least privilege for IAM roles.
+- [Overview](#overview)
+- [Project Features](#project-features)
+- [Architecture](#architecture)
+- [Technologies Used](#technologies-used)
+- [How It Works](#how-it-works)
+- [Getting Started](#getting-started)
+- [Join the Challenge](#join-the-challenge)
 
-## **Prerequisites**
-- Free account with subscription and API Key at [sportsdata.io](https://sportsdata.io/)
-- Personal AWS account with basic understanding of AWS and Python
+## Overview
 
----
+The **NBA Game Notification App** is designed to provide real-time updates on NBA game scores directly to your inbox or phone. Whether you're a die-hard basketball fan or just want to stay informed, this app ensures you never miss out on the action. Leveraging AWS's serverless architecture, the app efficiently fetches game data, processes it, and delivers notifications seamlessly.
 
-## **Technical Architecture**
-![nba_API](https://github.com/user-attachments/assets/5e19635e-0685-4c07-9601-330f7d1231f9)
+## Project Features
 
+- **Real-Time Notifications:** Receive updates on game scores as they happen.
+- **Customizable Alerts:** Choose to get notifications via email or SMS.
+- **Scalable Architecture:** Built using AWS services to handle varying loads without manual intervention.
+- **Event-Driven Design:** Automates the workflow, ensuring timely delivery of notifications without constant monitoring.
 
----
+## Architecture
 
+![Architecture Diagram](architecture.png)
 
-## **Technologies**
-- **Cloud Provider**: AWS
-- **Core Services**: SNS, Lambda, EventBridge
-- **External API**: NBA Game API (SportsData.io)
-- **Programming Language**: Python 3.x
-- **IAM Security**:
-  - Least privilege policies for Lambda, SNS, and EventBridge.
+The architecture of the NBA Game Notification App is based on an **event-driven** model, utilizing several AWS services to create a seamless and automated notification system.
 
----
+### Components
 
-## **Project Structure**
-```bash
-game-day-notifications/
-├── src/
-│   ├── gd_notifications.py          # Main Lambda function code
-├── policies/
-│   ├── gb_sns_policy.json           # SNS publishing permissions
-│   ├── gd_eventbridge_policy.json   # EventBridge to Lambda permissions
-│   └── gd_lambda_policy.json        # Lambda execution role permissions
-├── .gitignore
-└── README.md                        # Project documentation
-```
+1. **AWS EventBridge:**
+   - Acts as the scheduler, triggering events at specified intervals (e.g., every 2 hours).
+   
+2. **AWS Lambda:**
+   - Executes the core logic to fetch NBA game data from an external API, processes the information, and prepares it for notification.
+   
+3. **AWS SNS (Simple Notification Service):**
+   - Handles the distribution of notifications to subscribed endpoints such as email addresses or phone numbers.
 
-## **Setup Instructions**
+## Technologies Used
 
-### **Clone the Repository**
-```bash
-git clone https://github.com/ifeanyiro9/game-day-notifications.git
-cd game-day-notifications
-```
+- **AWS Services:**
+  - **Lambda:** Serverless compute service to run code without provisioning servers.
+  - **SNS:** Managed service for sending messages to multiple subscribers.
+  - **EventBridge:** Serverless event bus to connect application data from various sources.
+  - **IAM:** Manages access and permissions for AWS resources.
+  
+- **Programming Language:**
+  - **Python:** Used for writing the Lambda function due to its simplicity and robust libraries for API interactions.
 
-### **Create an SNS Topic**
-1. Open the AWS Management Console.
-2. Navigate to the SNS service.
-3. Click Create Topic and select Standard as the topic type.
-4. Name the topic (e.g., gd_topic) and note the ARN.
-5. Click Create Topic.
+- **External API:**
+  - **SportsData.io API:** Provides real-time NBA game data, including scores, team information, and game statuses.
 
-### **Add Subscriptions to the SNS Topic**
-1. After creating the topic, click on the topic name from the list.
-2. Navigate to the Subscriptions tab and click Create subscription.
-3. Select a Protocol:
-- For Email:
-  - Choose Email.
-  - Enter a valid email address.
-- For SMS (phone number):
-  - Choose SMS.
-  - Enter a valid phone number in international format (e.g., +1234567890).
+## How It Works
 
-4. Click Create Subscription.
-5. If you added an Email subscription:
-- Check the inbox of the provided email address.
-- Confirm the subscription by clicking the confirmation link in the email.
-6. For SMS, the subscription will be immediately active after creation.
+1. **Scheduling with EventBridge:**
+   - **EventBridge** is configured to trigger the Lambda function at regular intervals (e.g., every 2 hours) between specific times (e.g., 9 AM to 2 AM).
+   
+2. **Data Retrieval and Processing:**
+   - When triggered, the **Lambda function** makes a request to the **SportsData.io API** to fetch the latest NBA game data.
+   - It processes the received JSON data to extract relevant information such as game status, teams, and scores.
+   
+3. **Publishing Notifications:**
+   - The processed information is then sent to an **SNS topic**.
+   - Subscribers to this SNS topic (via email or SMS) receive the game updates automatically.
+   
+4. **Secure and Scalable:**
+   - **IAM Roles and Policies** ensure that the Lambda function has the necessary permissions to interact with SNS and other AWS services securely.
+   - The serverless architecture ensures that the system scales effortlessly based on demand without manual intervention.
 
-### **Create the SNS Publish Policy**
-1. Open the IAM service in the AWS Management Console.
-2. Navigate to Policies → Create Policy.
-3. Click JSON and paste the JSON policy from gd_sns_policy.json file
-4. Replace REGION and ACCOUNT_ID with your AWS region and account ID.
-5. Click Next: Tags (you can skip adding tags).
-6. Click Next: Review.
-7. Enter a name for the policy (e.g., gd_sns_policy).
-8. Review and click Create Policy.
+## Getting Started
 
-### **Create an IAM Role for Lambda**
-1. Open the IAM service in the AWS Management Console.
-2. Click Roles → Create Role.
-3. Select AWS Service and choose Lambda.
-4. Attach the following policies:
-- SNS Publish Policy (gd_sns_policy) (created in the previous step).
-- Lambda Basic Execution Role (AWSLambdaBasicExecutionRole) (an AWS managed policy).
-5. Click Next: Tags (you can skip adding tags).
-6. Click Next: Review.
-7. Enter a name for the role (e.g., gd_role).
-8. Review and click Create Role.
-9. Copy and save the ARN of the role for use in the Lambda function.
+To set up and deploy the NBA Game Notification App, follow these general steps:
 
-### **Deploy the Lambda Function**
-1. Open the AWS Management Console and navigate to the Lambda service.
-2. Click Create Function.
-3. Select Author from Scratch.
-4. Enter a function name (e.g., gd_notifications).
-5. Choose Python 3.x as the runtime.
-6. Assign the IAM role created earlier (gd_role) to the function.
-7. Under the Function Code section:
-- Copy the content of the src/gd_notifications.py file from the repository.
-- Paste it into the inline code editor.
-8. Under the Environment Variables section, add the following:
-- NBA_API_KEY: your NBA API key.
-- SNS_TOPIC_ARN: the ARN of the SNS topic created earlier.
-9. Click Create Function.
+### Clone the Repository
+
+### Set Up AWS Services
+
+1. **Create an SNS Topic and Subscribe Your Email or Phone Number:**
+   - Navigate to the AWS SNS service.
+   - Create a new SNS topic (e.g., `GameDayTopic`).
+   - Subscribe your email address or phone number to the SNS topic and confirm the subscription.
+
+2. **Configure IAM Roles and Policies to Grant Necessary Permissions to the Lambda Function:**
+   - Use AWS IAM to create a policy that allows the Lambda function to publish to the SNS topic.
+   - Create an IAM role for the Lambda function and attach the created policy along with the basic execution role.
+
+3. **Deploy the Lambda Function Using the Provided Python Script:**
+   - Navigate to AWS Lambda service.
+   - Create a new Lambda function (e.g., `GD_Notifications`) using Python as the runtime.
+   - Attach the previously created IAM role to the Lambda function.
+   - Upload or paste the Python script into the Lambda function code editor and deploy.
+
+4. **Set Environment Variables for API Keys and SNS Topic ARN:**
+   - In the Lambda function configuration, set environment variables for the SportsData.io API key (`API_KEY`) and the SNS Topic ARN (`SNS_TOPIC_ARN`).
+
+5. **Configure EventBridge to Schedule the Lambda Function Execution:**
+   - Navigate to AWS EventBridge.
+   - Create a new rule with a cron expression to trigger the Lambda function at desired intervals (e.g., every 2 hours between 9 AM and 2 AM).
+
+### Test the Setup
+
+1. **Manually Trigger the Lambda Function to Ensure Notifications Are Working as Expected:**
+   - In the Lambda console, create a test event and invoke the function manually.
+   - Check the Lambda logs to ensure it executed successfully.
+
+2. **Verify That You Receive the Notifications on Your Subscribed Endpoints:**
+   - Check your email or SMS for the game notifications sent by the SNS topic.
 
 
-### **Set Up Automation with Eventbridge**
-1. Navigate to the Eventbridge service in the AWS Management Console.
-2. Go to Rules → Create Rule.
-3. Select Event Source: Schedule.
-4. Set the cron schedule for when you want updates (e.g., hourly).
-5. Under Targets, select the Lambda function (gd_notifications) and save the rule.
+## Join the Challenge
 
-
-### **Test the System**
-1. Open the Lambda function in the AWS Management Console.
-2. Create a test event to simulate execution.
-3. Run the function and check CloudWatch Logs for errors.
-4. Verify that SMS notifications are sent to the subscribed users.
-
-
-### **What We Learned**
-1. Designing a notification system with AWS SNS and Lambda.
-2. Securing AWS services with least privilege IAM policies.
-3. Automating workflows using EventBridge.
-4. Integrating external APIs into cloud-based workflows.
-
-
-### **Future Enhancements**
-1. Add NFL score alerts for extended functionality.
-2. Store user preferences (teams, game types) in DynamoDB for personalized alerts.
-3. Implement a web UI
+I'm excited to share my journey through this **30 Days DevOps Challenge**! Follow along, contribute, and share your progress using the hashtag [#DevOpsAllStarsChallenge](https://twitter.com/hashtag/DevOpsAllStarsChallenge). Let's learn and grow together in the world of DevOps!
